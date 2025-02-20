@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gabrielalbernazdev/rating-app-api/dtos"
@@ -69,8 +70,9 @@ func GetCompany(w http.ResponseWriter, r *http.Request) {
 
 func CreateCompany(w http.ResponseWriter, r *http.Request) {
 	var company models.Company
+	var err error
 
-	if err := json.NewDecoder(r.Body).Decode(&company); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&company); err != nil {
         utils.WriteJson(
             w,
             dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
@@ -79,17 +81,17 @@ func CreateCompany(w http.ResponseWriter, r *http.Request) {
         return
 	}
 
-    validationErr := validations.ValidateCompanyCreateBody(company)
-	if validationErr != nil {
+    err = validations.ValidateCompanyCreateBody(company)
+	if err != nil {
         utils.WriteJson(
             w,
-            dtos.GenericErrorResponseDto{Error: validationErr.Error(), Timestamp: time.Now()},
+            dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
             http.StatusUnprocessableEntity,
         )
         return
 	}
 
-	if err := services.CreateCompany(company); err != nil {
+	if err = services.CreateCompany(company); err != nil {
         utils.WriteJson(
             w,
             dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
@@ -107,8 +109,10 @@ func CreateCompany(w http.ResponseWriter, r *http.Request) {
 
 func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	var company models.Company
+	var err error
+
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id, err := strconv.Atoi(strings.TrimSpace(vars["id"]))
 	if err != nil {
         utils.WriteJson(
             w,
@@ -118,7 +122,7 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
         return
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&company); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&company); err != nil {
         utils.WriteJson(
             w,
             dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
@@ -129,17 +133,17 @@ func UpdateCompany(w http.ResponseWriter, r *http.Request) {
 
 	company.ID = id
 
-	validationErr := validations.ValidateCompanyCreateBody(company)
-	if validationErr != nil {
+	err = validations.ValidateCompanyCreateBody(company)
+	if err != nil {
         utils.WriteJson(
             w,
-            dtos.GenericErrorResponseDto{Error: validationErr.Error(), Timestamp: time.Now()},
+            dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
             http.StatusUnprocessableEntity,
         )
         return
 	}
 
-	if err := services.UpdateCompany(company); err != nil {
+	if err = services.UpdateCompany(company); err != nil {
 		utils.WriteJson(
             w,
             dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},

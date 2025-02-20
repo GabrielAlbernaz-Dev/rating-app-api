@@ -32,6 +32,11 @@ func Init() {
 	protectedApiRouter.HandleFunc(
 		"/companies/{id}", middlewares.HasAnyRole([]string{"ADMIN"})(controllers.DeleteCompany),
 	).Methods("DELETE")
+	protectedApiRouter.HandleFunc("/complaints", controllers.GetAllComplaints).Methods("GET")
+	protectedApiRouter.HandleFunc("/complaints/{id}", controllers.GetComplaint).Methods("GET")
+	protectedApiRouter.HandleFunc("/complaints", controllers.CreateComplaint).Methods("POST")
+	protectedApiRouter.HandleFunc("/complaints/{id}", controllers.UpdateComplaint).Methods("PUT")
+	protectedApiRouter.HandleFunc("/complaints/{id}", controllers.DeleteComplaint).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

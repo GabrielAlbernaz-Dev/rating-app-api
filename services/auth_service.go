@@ -1,15 +1,19 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/gabrielalbernazdev/rating-app-api/models"
 	"github.com/gabrielalbernazdev/rating-app-api/repositories"
 	"github.com/gabrielalbernazdev/rating-app-api/utils"
 )
 
 func AuthVerifyUser(user models.User) (bool, error) {
-	verifyUser, err := repositories.FindUserByEmail(user.Email)
-	if err != nil {
-		return false, err
+	var err error
+	verifyUser, _ := repositories.FindUserByEmail(user.Email)
+
+	if verifyUser == nil || verifyUser.ID == 0 {
+		return false, fmt.Errorf("user with email %s not found", user.Email)
 	}
 
 	verifyPassword := utils.CheckPasswordHash(user.Password, verifyUser.Password)

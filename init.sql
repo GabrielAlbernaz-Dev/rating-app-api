@@ -4,9 +4,9 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
-    active BOOLEAN DEFAULT TRUE
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: roles
@@ -62,8 +62,8 @@ CREATE TABLE companies (
     email VARCHAR(255) NULL,
     phone VARCHAR(20) NULL,
     category_id INT NULL,
-    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_company_category FOREIGN KEY (category_id) REFERENCES company_categories(id) ON DELETE SET NULL
 );
 
@@ -74,10 +74,8 @@ CREATE TABLE complaints (
     company_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) NOT NULL DEFAULT 'Open',
-    visibility VARCHAR(10) NOT NULL DEFAULT 'Public',
-    rating INT CHECK (rating BETWEEN 1 AND 5),
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_complaint_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_complaint_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
@@ -89,8 +87,8 @@ CREATE TABLE responses (
     user_id INT NULL,
     company_id INT NULL,
     content TEXT NOT NULL,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     company_response BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_response_complaint FOREIGN KEY (complaint_id) REFERENCES complaints(id) ON DELETE CASCADE,
     CONSTRAINT fk_response_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT fk_response_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE SET NULL
@@ -119,7 +117,7 @@ CREATE TABLE ratings (
     user_id INT NOT NULL,
     rating_value INT NOT NULL CHECK (rating_value BETWEEN 1 AND 5),
     comment TEXT NULL,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_rating_complaint FOREIGN KEY (complaint_id) REFERENCES complaints(id) ON DELETE CASCADE,
     CONSTRAINT fk_rating_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

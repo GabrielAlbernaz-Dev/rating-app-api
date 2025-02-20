@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	companyTable = "companies"
-	selectCompanyFields = "id, name, cnpj, address, email, phone, category_id, registration_date, active"
-	insertCompanyFields = "name, cnpj, address, email, phone, category_id, registration_date"
+	companyTable        = "companies"
+	selectCompanyFields = "id, name, cnpj, address, email, phone, category_id, active, created_at"
+	insertCompanyFields = "name, cnpj, address, email, phone, category_id, created_at"
 )
 
 func FindAllCompanies() ([]models.Company, error) {
@@ -32,13 +32,14 @@ func FindAllCompanies() ([]models.Company, error) {
 		var company models.Company
 		err := rows.Scan(
 			&company.ID,
+			&company.Name,
 			&company.CNPJ,
 			&company.Address,
 			&company.Email,
 			&company.Phone,
 			&company.CategoryID,
-			&company.RegistrationDate,
 			&company.Active,
+			&company.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("error to scaning company: %v", err)
@@ -56,15 +57,35 @@ func FindAllCompanies() ([]models.Company, error) {
 func FindCompany(company models.Company) (*models.Company, error) {
 	sql := fmt.Sprintf("SELECT %s FROM %s WHERE id = $1", selectCompanyFields, companyTable)
 	err := database.DB.QueryRow(context.Background(), sql, company.ID).Scan(
-		&company.ID, 
-		&company.Name, 
+		&company.ID,
+		&company.Name,
 		&company.CNPJ,
-		&company.Address, 
-		&company.Email, 
+		&company.Address,
+		&company.Email,
 		&company.Phone,
 		&company.CategoryID,
-		&company.RegistrationDate,
 		&company.Active,
+		&company.CreatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error to find company: %v", err)
+	}
+
+	return &company, nil
+}
+
+func FindCompanyByCNPJ(company models.Company) (*models.Company, error) {
+	sql := fmt.Sprintf("SELECT %s FROM %s WHERE cnpj = $1", selectCompanyFields, companyTable)
+	err := database.DB.QueryRow(context.Background(), sql, utils.FormatCpfCnpj(company.CNPJ)).Scan(
+		&company.ID,
+		&company.Name,
+		&company.CNPJ,
+		&company.Address,
+		&company.Email,
+		&company.Phone,
+		&company.CategoryID,
+		&company.Active,
+		&company.CreatedAt,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error to find company: %v", err)
@@ -75,12 +96,13 @@ func FindCompany(company models.Company) (*models.Company, error) {
 
 func CreateCompany(company models.Company) error {
 	sql := fmt.Sprintf(`
-		INSERT INTO companies (%s)
+		INSERT INTO %s (%s)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id
-	`, insertCompanyFields)
+	`, companyTable, insertCompanyFields)
 
 	company.CNPJ = utils.FormatCpfCnpj(company.CNPJ)
+	company.Phone = utils.FormatPhone(company.Phone)
 
 	err := database.DB.QueryRow(context.Background(), sql, company.Name, company.CNPJ, company.Address, company.Email, company.Phone, company.CategoryID, time.Now()).Scan(&company.ID)
 	if err != nil {
@@ -131,9 +153,9 @@ func UpdateCompany(company models.Company) error {
 		argIndex++
 	}
 
-	if !company.RegistrationDate.IsZero() {
-		setClauses = append(setClauses, fmt.Sprintf("registration_date = $%d", argIndex))
-		args = append(args, company.RegistrationDate)
+	if !company.CreatedAt.IsZero() {
+		setClauses = append(setClauses, fmt.Sprintf("created_at = $%d", argIndex))
+		args = append(args, company.CreatedAt)
 		argIndex++
 	}
 

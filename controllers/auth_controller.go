@@ -14,8 +14,9 @@ import (
 
 func AuthLogin(w http.ResponseWriter, r *http.Request) {
     var user models.User
+    var err error
 
-    if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+    if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
         utils.WriteJson(
             w,
             dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
@@ -24,20 +25,20 @@ func AuthLogin(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-	if validationErr := validations.ValidateUserLoginBody(user); validationErr != nil {
+	if err = validations.ValidateUserLoginBody(user); err != nil {
         utils.WriteJson(
             w,
-            dtos.GenericErrorResponseDto{Error: validationErr.Error(), Timestamp: time.Now()},
+            dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
             http.StatusUnprocessableEntity,
         )
         return
 	}
 
-    login, loginErr := services.AuthVerifyUser(user)
-    if loginErr != nil {
+    login, err := services.AuthVerifyUser(user)
+    if err != nil {
         utils.WriteJson(
             w,
-            dtos.GenericErrorResponseDto{Error: loginErr.Error(), Timestamp: time.Now()},
+            dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
             http.StatusBadRequest,
         )
         return
@@ -71,8 +72,9 @@ func AuthLogin(w http.ResponseWriter, r *http.Request) {
 
 func AuthRegister(w http.ResponseWriter, r *http.Request) {
     var user models.User
+    var err error
 
-    if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+    if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
         utils.WriteJson(
             w,
             dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
@@ -81,19 +83,19 @@ func AuthRegister(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-	if validationErr := validations.ValidateUserRegisterBody(user); validationErr != nil {
+	if err = validations.ValidateUserRegisterBody(user); err != nil {
         utils.WriteJson(
             w,
-            dtos.GenericErrorResponseDto{Error: validationErr.Error(), Timestamp: time.Now()},
+            dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
             http.StatusUnprocessableEntity,
         )
         return
 	}
 
-    if registerErr := services.AuthRegisterUser(user); registerErr != nil {
+    if err = services.AuthRegisterUser(user); err != nil {
         utils.WriteJson(
             w,
-            dtos.GenericErrorResponseDto{Error: registerErr.Error(), Timestamp: time.Now()},
+            dtos.GenericErrorResponseDto{Error: err.Error(), Timestamp: time.Now()},
             http.StatusBadRequest,
         )
         return
